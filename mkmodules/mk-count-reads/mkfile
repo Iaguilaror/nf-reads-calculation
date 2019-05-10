@@ -1,0 +1,15 @@
+MKSHELL=/bin/bash
+
+%/project_reads.stats:Q:
+	echo "[DEBUG] calculating number of reads in project"
+	# create header
+	echo "sample number_of_reads" | tr " " "\t" > $target.build
+	for ifile in $stem/*.bam
+	do
+	echo "[DEBUG] counting in $ifile"
+	# get sampleID
+	sampleID=$(basename $ifile .bam | sed "s#^sample_##" )
+	samtools idxstats $ifile | awk '{sum+=$3+$4;} END{print sum}' \
+	| sed "s#^#$sampleID\t#" >> $target.build
+	done \
+	&& mv $target.build $target
